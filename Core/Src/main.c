@@ -326,7 +326,7 @@ void Przestaw_zegar(uint8_t Kombinacja)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  //RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 
 
   // Ustaw HSI jako źródło SYSCLK (jeśli nie jest) i wszystkie dzielniki na 1
@@ -343,20 +343,16 @@ void Przestaw_zegar(uint8_t Kombinacja)
   }
   // Przestawienie źródła MCO na SYSCLK (nie będzie tego w programie właściwym)
   // HAL_RCC_MCOConfig(RCC_MCO, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_1);
-  // Wyłączenie PLLki (jeśli włączona)
-  if(RCC_OscInitStruct.PLL.PLLState != RCC_PLL_OFF)
+  // Wyłączenie PLLki bo nie można zmienić jej ustawień gdy jest włączona
+
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-    {
-      Error_Handler();
-    }
+    Error_Handler();
   }
+
   // No i tera można se ustawiać co się chce
-  // Wspólne ustawienia dla wszystkich kombinacji
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI;
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+
   switch (Kombinacja) 
   {
     case 0: // Minimalna emisja - Tylko HSI (PLL wyłączone) - punkt odniesienia
